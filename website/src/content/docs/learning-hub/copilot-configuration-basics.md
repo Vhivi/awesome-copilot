@@ -3,7 +3,7 @@ title: 'Copilot Configuration Basics'
 description: 'Learn how to configure GitHub Copilot at user, workspace, and repository levels to optimize your AI-assisted development experience.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-07-13
+lastUpdated: 2026-07-27
 estimatedReadingTime: '10 minutes'
 tags:
   - configuration
@@ -449,7 +449,11 @@ The model picker opens in a **full-screen view** with inline reasoning effort ad
 
 **Model family aliases** (v1.0.64+): Instead of typing a full model name, you can use short family aliases in the model setting: `opus`, `sonnet`, `haiku` (Anthropic), and `gpt`, `gemini` (Google/OpenAI). The CLI resolves the alias to the latest available model in that family. This is especially useful in scripts or configuration files where you want to track the best model in a family without hardcoding a version string.
 
-### CLI Session Commands
+**Recently added models**:
+- `claude-opus-5` — Anthropic's most capable model (v1.0.75+)
+- `gemini-3.6-flash` — Google's fast, cost-efficient model (v1.0.74+)
+
+
 
 The `/settings` command (v1.0.61+) opens an interactive dialog to browse and edit all user settings in one place. Use it to discover available settings, toggle options, and update values without manually editing your config file:
 
@@ -467,6 +471,26 @@ The settings dialog supports search — type to filter settings by name. Changes
 /model --repo       # view/edit the model pinned for this repository
 /model --local      # view/edit your personal model preference
 ```
+
+*(v1.0.72+)* Use **`/model --session`** (or `/model -s`) to change the model, reasoning effort, or context window for just the **current session**, without touching your global or repository settings:
+
+```
+/model --session claude-opus-5          # use Opus 5 for this session only
+/model -s gemini-3.6-flash              # fast model for this session
+/model -s claude-sonnet-4.6 high        # set model and reasoning effort
+```
+
+When the session ends, your global model preference is restored automatically.
+
+*(v1.0.74+)* Use **`/model plan`** (or `/model --plan`) to pick a separate model specifically for **plan mode**. The plan model is used when you enter plan mode and reverts to the session model when you leave:
+
+```
+/model plan                   # open the plan-mode model picker
+/model --plan claude-sonnet-5 # set a specific model for plan mode
+/model --plan off              # clear the plan-mode model override
+```
+
+This is useful when you want a more capable (or faster/cheaper) model for planning than for implementation.
 
 These flags mirror the **Repo** and **Repo (local)** scope tabs available in the `/settings` dashboard (v1.0.71+), making it easier to manage per-repository vs. user-global configuration without ambiguity. In v1.0.71+, the `/settings` dashboard also shows **Repo** and **Repo (local)** tabs alongside the existing user-level view, giving you a unified place to see which settings are applied at each layer.
 

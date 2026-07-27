@@ -3,7 +3,7 @@ title: 'Automating with Hooks'
 description: 'Learn how to use hooks to automate lifecycle events like formatting, linting, and governance checks during Copilot agent sessions.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-07-13
+lastUpdated: 2026-07-27
 estimatedReadingTime: '8 minutes'
 tags:
   - hooks
@@ -94,7 +94,7 @@ Hooks can trigger on several lifecycle events:
 | `postToolUse` | After a tool **successfully** completes execution | Log results, track usage, format code after edits |
 | `postToolUseFailure` | When a tool call **fails with an error** | Log errors for debugging, send failure alerts, track error patterns |
 | `PermissionRequest` | When the CLI shows a **permission prompt** to the user | Programmatically approve or deny permission requests, enable auto-approval in CI/headless environments |
-| `agentStop` | Main agent finishes responding to a prompt | Run final linters/formatters, validate complete changes |
+| `agentStop` | Main agent finishes responding to a prompt | Run final linters/formatters, validate complete changes. See [Loop prevention](#agentstop-loop-prevention) below. |
 | `preCompact` | Before the agent compacts its context window | Save a snapshot, log compaction event, run summary scripts |
 | `subagentStart` | A subagent is spawned by the main agent | Inject additional context into the subagent's prompt, log subagent launches |
 | `subagentStop` | A subagent completes before returning results | Audit subagent outputs, log subagent activity |
@@ -369,7 +369,27 @@ Run ESLint after the agent finishes responding and block if there are errors:
 
 If the lint command exits with a non-zero status, the action is blocked.
 
-### Security Gating with preToolUse
+### agentStop Loop Prevention
+
+*(v1.0.72+)* If an `agentStop` hook consistently blocks (returns a non-zero exit code on every invocation), the CLI now ends the turn after **8 consecutive blocks** instead of looping indefinitely. This prevents runaway sessions when a hook is misconfigured or reacts to its own changes.
+
+Your hook script receives a `stop_hook_active` environment variable that tells it when the CLI is about to force a continuation. Use this to self-limit and avoid repeated blocking:
+
+```bash
+#!/usr/bin/env bash
+# If we're in a forced continuation, don't block again
+if [ "${stop_hook_active}" = "true" ]; then
+  echo '{"decision": "approve", "reason": "Forced continuation — skipping repeated block"}' >&2
+  exit 0
+fi
+
+# Normal lint check
+npx eslint . --max-warnings 0
+```
+
+This is especially relevant for hooks that run linters or formatters — if a lint error persists after the agent has tried to fix it 8 times, the session will exit instead of hanging.
+
+
 
 Block dangerous commands before they execute. Use the `matcher` field to target only the `bash` tool, so the hook doesn't fire for file edits or other tools:
 

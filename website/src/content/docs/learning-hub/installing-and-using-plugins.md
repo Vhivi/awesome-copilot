@@ -3,7 +3,7 @@ title: 'Installing and Using Plugins'
 description: 'Learn how to find, install, and manage plugins that extend GitHub Copilot CLI with reusable agents, skills, hooks, and integrations.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-07-13
+lastUpdated: 2026-07-27
 estimatedReadingTime: '8 minutes'
 tags:
   - plugins
@@ -74,7 +74,13 @@ The `plugin.json` manifest declares what the plugin contains:
 }
 ```
 
-## Why Use Plugins?
+### Open Plugin Spec v1 and mcp.json Support
+
+*(v1.0.74+)* GitHub Copilot CLI now supports **Open Plugin Spec v1** plugin manifests as an alternative to `plugin.json`. If your plugin ships with an `mcp.json` (or `.github/mcp.json`) file, the CLI reads it automatically to configure the bundled MCP servers — no additional setup required.
+
+This means plugins authored for other MCP-compatible tools can be installed in GitHub Copilot CLI without conversion.
+
+
 
 You might wonder: why not just copy agent files into your project manually? Plugins provide several advantages:
 
@@ -200,13 +206,34 @@ Or from an interactive session:
 
 > **Deprecation notice**: Installing plugins directly from a GitHub repository URL, raw URL, or local file path (e.g., `copilot plugin install github/awesome-copilot`) is deprecated and will be removed in a future release. Use marketplace-based installation instead.
 
+### Installing Skills Directly
+
+*(v1.0.72+)* You can install individual skills from the CLI without wrapping them in a plugin:
+
+```bash
+# Install a skill from a file or directory
+copilot plugins install --skill ./my-skill/
+
+# Install a skill from a URL
+copilot plugins install --skill https://example.com/skills/my-skill.zip
+
+# Install a skill into the current project repository (instead of user-level)
+copilot plugins install --skill ./my-skill/ --scope project
+```
+
+Skills installed this way are managed alongside plugins and can be removed with:
+
+```bash
+copilot plugins remove --skill my-skill
+```
+
 ### From VS Code
 
 Browse to the plugin via `@agentPlugins` in the Extensions search view or via **Chat: Plugins** in the Command Palette, then click **Install**.
 
 ## Managing Plugins
 
-Once installed, plugins are managed with a few simple commands:
+*(v1.0.72+)* The `/plugins` command supports a full set of management verbs, with granular targeting for plugins, MCP servers, and skills:
 
 ```bash
 # List all installed plugins
@@ -220,6 +247,14 @@ copilot plugin marketplace update
 
 # Remove a plugin
 copilot plugin uninstall my-plugin
+
+# Enable or disable a plugin, MCP server, or skill individually
+/plugins enable --plugin my-plugin
+/plugins disable --mcp my-mcp-server
+/plugins enable --skill my-skill
+
+# Get help with plugin management
+/plugins help
 ```
 
 ### Loading Plugins from a Local Directory
