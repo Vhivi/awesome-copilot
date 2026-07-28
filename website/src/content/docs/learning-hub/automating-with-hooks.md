@@ -3,7 +3,7 @@ title: 'Automating with Hooks'
 description: 'Learn how to use hooks to automate lifecycle events like formatting, linting, and governance checks during Copilot agent sessions.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-07-13
+lastUpdated: 2026-07-28
 estimatedReadingTime: '8 minutes'
 tags:
   - hooks
@@ -94,7 +94,7 @@ Hooks can trigger on several lifecycle events:
 | `postToolUse` | After a tool **successfully** completes execution | Log results, track usage, format code after edits |
 | `postToolUseFailure` | When a tool call **fails with an error** | Log errors for debugging, send failure alerts, track error patterns |
 | `PermissionRequest` | When the CLI shows a **permission prompt** to the user | Programmatically approve or deny permission requests, enable auto-approval in CI/headless environments |
-| `agentStop` | Main agent finishes responding to a prompt | Run final linters/formatters, validate complete changes |
+| `agentStop` | Main agent finishes responding to a prompt | Run final linters/formatters, validate complete changes. *(v1.0.72+)* A hook that repeatedly blocks will be force-continued after 8 consecutive blocks; the hook receives a `stop_hook_active: true` flag so it can self-limit and avoid looping indefinitely |
 | `preCompact` | Before the agent compacts its context window | Save a snapshot, log compaction event, run summary scripts |
 | `subagentStart` | A subagent is spawned by the main agent | Inject additional context into the subagent's prompt, log subagent launches |
 | `subagentStop` | A subagent completes before returning results | Audit subagent outputs, log subagent activity |
