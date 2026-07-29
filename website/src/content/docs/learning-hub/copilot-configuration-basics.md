@@ -3,7 +3,7 @@ title: 'Copilot Configuration Basics'
 description: 'Learn how to configure GitHub Copilot at user, workspace, and repository levels to optimize your AI-assisted development experience.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-07-13
+lastUpdated: 2026-07-29
 estimatedReadingTime: '10 minutes'
 tags:
   - configuration
@@ -428,7 +428,7 @@ CLI settings use **camelCase** naming. Key settings added in recent releases:
 | `continueOnAutoMode` | Automatically switch to the auto model on rate limit instead of pausing |
 | `proxy` | HTTP(S) proxy URL for all outbound CLI requests (e.g., `http://proxy.example.com:8080`) (v1.0.64+) |
 | `sessionLimits` | Restrict credit or turn usage for a session; limits apply across the current conversation and reset on `/clear` (v1.0.66+) |
-| `stayInAutopilot` | Keep the CLI in autopilot mode after an autopilot task completes, instead of returning to interactive mode (v1.0.69+) |
+| `stayInAutopilot` | Keep the CLI in autopilot mode after an autopilot task completes, instead of returning to interactive mode (v1.0.69+). As of v1.0.76-0, this defaults to `true` — autopilot stays active between tasks by default; set `stayInAutopilot: false` to restore the previous behavior of returning to interactive mode after each task. |
 
 > **Note**: Older snake_case names (e.g., `include_gitignored`, `auto_updates_channel`) are still accepted for backward compatibility, but camelCase is now the preferred format.
 
@@ -448,6 +448,8 @@ The model picker opens in a **full-screen view** with inline reasoning effort ad
 **Auto mode and server-side model routing** (v1.0.43+): When you select **Auto** as your model, the CLI uses server-side model routing for real-time model selection. Instead of locking in a single model at session start, Auto mode evaluates each request and routes it to the most appropriate model dynamically. This means straightforward questions can be handled by a faster model while complex reasoning tasks are automatically escalated — without you needing to switch models manually.
 
 **Model family aliases** (v1.0.64+): Instead of typing a full model name, you can use short family aliases in the model setting: `opus`, `sonnet`, `haiku` (Anthropic), and `gpt`, `gemini` (Google/OpenAI). The CLI resolves the alias to the latest available model in that family. This is especially useful in scripts or configuration files where you want to track the best model in a family without hardcoding a version string.
+
+**Recently added models**: Claude Opus 5 (v1.0.75) and gemini-3.6-flash (v1.0.74) are available as selectable models. Use the model picker or `opus`/`gemini` family aliases to access the latest versions.
 
 ### CLI Session Commands
 
@@ -469,6 +471,16 @@ The settings dialog supports search — type to filter settings by name. Changes
 ```
 
 These flags mirror the **Repo** and **Repo (local)** scope tabs available in the `/settings` dashboard (v1.0.71+), making it easier to manage per-repository vs. user-global configuration without ambiguity. In v1.0.71+, the `/settings` dashboard also shows **Repo** and **Repo (local)** tabs alongside the existing user-level view, giving you a unified place to see which settings are applied at each layer.
+
+*(v1.0.74+)* Use `/model plan` (or `/model --plan`) to choose a **separate model for plan mode**. This lets you run a more capable model while planning and a faster model during execution — or vice versa:
+
+```
+/model plan              # open the model picker for plan mode
+/model --plan            # same as above
+/model --plan off        # clear the plan-mode model (fall back to session model)
+```
+
+When you enter plan mode, Copilot automatically switches to the plan-mode model; when you exit plan mode, it reverts to the regular session model. This is useful when you want high-reasoning quality for generating plans (e.g., `opus`) but faster throughput for executing steps (e.g., `sonnet`).
 
 GitHub Copilot CLI has two commands for managing session state, with distinct behaviours:
 
@@ -724,6 +736,19 @@ gh copilot --effort high "Refactor the authentication module"
 ```
 
 Accepted values are `low`, `medium`, and `high`. You can also set a default via the `effortLevel` config setting.
+
+### Sessions Sidebar
+
+*(v1.0.76-2, experimental)* The **Sessions sidebar** provides a split-view panel for managing multiple concurrent sessions without leaving your current session. Enable it with `/experimental on`, then toggle the sidebar with **Ctrl+X → h** (or configure `sidebar.hoverFocus` and `sidebar.accentActiveSession` in `/settings`):
+
+- Switch between active sessions using arrow keys and **Enter**
+- Spawn a new session by pressing **n** in the sidebar
+- Close a session with **x x** from the keyboard
+- The active session card is highlighted (accent color) by default for quick identification
+
+Hover-to-focus is off by default — you move focus explicitly, so glancing at the sidebar won't accidentally switch sessions. To return the sidebar to a collapsed state, press **Ctrl+X → h** again.
+
+> **Note**: The Sessions sidebar is an experimental feature as of v1.0.76-2. Enable it with `/experimental on` before use.
 
 ### CLI Startup Flags
 
