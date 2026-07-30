@@ -3,7 +3,7 @@ title: 'Defining Custom Instructions'
 description: 'Learn how to create persistent, context-aware instructions that guide GitHub Copilot automatically across your codebase.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-07-01
+lastUpdated: 2026-07-30
 estimatedReadingTime: '8 minutes'
 tags:
   - instructions
@@ -141,6 +141,35 @@ applyTo: '**'
 
 **Expected Result**:
 When you work on a file matching the pattern, Copilot incorporates that instruction's context into suggestions and chat responses automatically.
+
+## Customizing Dictation and Voice Mode (VS Code)
+
+*(VS Code 1.131+)* When you use Copilot's Dictation or Voice Mode in VS Code, you can guide how Copilot processes or transforms your spoken input by placing customization instructions in dedicated markdown files:
+
+| File | Scope | Purpose |
+|------|-------|---------|
+| `~/.copilot/dictation.md` | Global (all workspaces) | Instructions for dictation transcript cleanup |
+| `~/.copilot/voice.md` | Global (all workspaces) | Instructions for voice mode behaviour |
+| `.github/copilot/dictation.md` | Workspace | Project-level dictation instructions |
+| `.github/copilot/voice.md` | Workspace | Project-level voice instructions |
+
+Workspace-level files take precedence over global ones for the current project.
+
+**Example `~/.copilot/dictation.md`**:
+
+```markdown
+When cleaning up dictated text:
+- Expand common abbreviations (e.g. "func" → "function", "param" → "parameter")
+- Preserve technical terms and identifiers exactly as spoken
+- Do not add punctuation to code snippets
+```
+
+**When to use these files**:
+- Your team uses domain-specific jargon or project names that Copilot should preserve
+- You want consistent formatting for dictated code comments vs. prose
+- You need to suppress certain transcript transformations for a specific project
+
+These files follow the same plain Markdown format as other Copilot instruction files — no frontmatter is required.
 
 ## Composing Instructions with @-style Imports
 

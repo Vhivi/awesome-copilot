@@ -3,7 +3,7 @@ title: 'Agents and Subagents'
 description: 'Learn how delegated subagents differ from primary agents, when to use them, and how to launch them in VS Code and Copilot CLI.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-07-01
+lastUpdated: 2026-07-30
 estimatedReadingTime: '9 minutes'
 tags:
   - agents
@@ -105,7 +105,17 @@ Analyze this feature in parallel:
 Then summarize the findings into one recommendation.
 ```
 
-### 4. Know the nesting rule
+### 4. Monitor subagent progress
+
+As of VS Code 1.131 (July 2026), the editor surfaces live subagent status in the chat view. While a subagent is running you can see:
+
+- **Which model** the subagent is using (useful when subagents are configured to use different models)
+- **Elapsed time** since the subagent was launched
+- **Active tool call** being executed at that moment
+
+This removes the guesswork from long-running orchestrations — you can see exactly what is happening without waiting for the final synthesized output.
+
+### 5. Know the nesting rule
 
 By default, subagents do not keep spawning additional subagents. In VS Code, recursive delegation is controlled by the `chat.subagents.allowInvocationsFromSubagents` setting, which is off by default.
 
