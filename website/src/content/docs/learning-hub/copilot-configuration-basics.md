@@ -3,7 +3,7 @@ title: 'Copilot Configuration Basics'
 description: 'Learn how to configure GitHub Copilot at user, workspace, and repository levels to optimize your AI-assisted development experience.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-07-13
+lastUpdated: 2026-07-31
 estimatedReadingTime: '10 minutes'
 tags:
   - configuration
@@ -432,6 +432,20 @@ CLI settings use **camelCase** naming. Key settings added in recent releases:
 
 > **Note**: Older snake_case names (e.g., `include_gitignored`, `auto_updates_channel`) are still accepted for backward compatibility, but camelCase is now the preferred format.
 
+### Authentication and Login
+
+Use `copilot login` to authenticate. Starting with v1.0.77, the login flow defaults to a **browser-based (web) OAuth flow** on local interactive terminals — your browser opens automatically and you authorize in one click. On remote or headless terminals, the device code flow remains the default:
+
+```bash
+copilot login              # default: web flow on local, device code on remote
+copilot login --web-flow   # force browser-based OAuth
+copilot login --device-code  # force device code flow
+```
+
+You can also switch login methods interactively within a session using the `/login` command, which presents the same `--web-flow` / `--device-code` options.
+
+> **Enterprise / MDM managed policy (v1.0.77+)**: Administrators can enforce sandbox and authentication policies via macOS and Windows native MDM settings. Managed settings tighten (but never loosen) the user's sandbox policy, with locked fields visible in `/sandbox` to confirm what's enforced.
+
 In addition to the main config file, GitHub Copilot CLI reads two optional per-project files for repository-specific overrides:
 
 - `.claude/settings.json` — committed project settings
@@ -448,6 +462,16 @@ The model picker opens in a **full-screen view** with inline reasoning effort ad
 **Auto mode and server-side model routing** (v1.0.43+): When you select **Auto** as your model, the CLI uses server-side model routing for real-time model selection. Instead of locking in a single model at session start, Auto mode evaluates each request and routes it to the most appropriate model dynamically. This means straightforward questions can be handled by a faster model while complex reasoning tasks are automatically escalated — without you needing to switch models manually.
 
 **Model family aliases** (v1.0.64+): Instead of typing a full model name, you can use short family aliases in the model setting: `opus`, `sonnet`, `haiku` (Anthropic), and `gpt`, `gemini` (Google/OpenAI). The CLI resolves the alias to the latest available model in that family. This is especially useful in scripts or configuration files where you want to track the best model in a family without hardcoding a version string.
+
+**Plan mode model** *(v1.0.74+)*: Use `/model plan` (or `/model --plan`) to pick a dedicated model for use while in plan mode, independent of your session model:
+
+```
+/model plan              # open the model picker for plan mode
+/model plan claude-haiku-4-5  # set a specific model for plan mode
+/model plan off          # clear the plan-mode model override
+```
+
+When you leave plan mode, the session reverts to your regular session model.
 
 ### CLI Session Commands
 
@@ -665,6 +689,12 @@ The `/usage` command displays session metrics such as the number of tokens consu
 /usage
 ```
 
+The `/limits predict` command *(v1.0.76+)* suggests a session AI-credit limit based on similar past sessions. Use it before starting a large task to estimate how much credit the session is likely to consume, then set a session limit accordingly:
+
+```
+/limits predict
+```
+
 The `/compact` command summarizes the conversation history to free up context window space while preserving the thread of the conversation. Use it when your context is getting full but you do not want to start a fresh session:
 
 ```
@@ -710,6 +740,14 @@ The `/autopilot` command (v1.0.45+) is a quick in-session toggle that switches b
 ```
 
 Use `/autopilot` when you want to flip between supervised and unsupervised operation mid-session without typing out the full `/allow-all on` or `/allow-all off` commands.
+
+The `/permissions` command *(v1.0.78+)* lets you switch between approval modes directly from within a session, without using `/allow-all` or `/autopilot`. It provides a focused interface for changing how the CLI handles tool-use confirmations:
+
+```
+/permissions      # open the approval mode switcher
+```
+
+This is the recommended way to adjust approval behavior when you want a clear, discoverable control for permission management.
 
 > **Enhanced autopilot (v1.0.64+)**: When autopilot mode is active — including when launched with `--autopilot` at startup or during automatic continuation turns — the agent automatically handles elicitation dialogs, `ask_user` prompts, sampling requests, and permission prompts without surfacing them as interactive dialogs. This means long-running automated sessions can proceed end-to-end without manual confirmation steps.
 
@@ -761,6 +799,16 @@ copilot --no-sandbox -p "Set up development environment with system tools"
 
 These flags apply only to the current invocation — your persisted sandbox preference remains unchanged.
 
+The `allowDevToolCaches` sandbox setting *(v1.0.78+)* is on by default and grants sandboxed builds access to toolchain caches, registries, and package installs (npm cache, pip cache, etc.) so builds work without extra setup. Set it to `false` in your sandbox config to opt out and run with fully isolated toolchain access:
+
+```json
+{
+  "sandbox": {
+    "allowDevToolCaches": false
+  }
+}
+```
+
 The `--attachment` flag (available in prompt mode, `-p`) lets you attach files — images or native documents — to the initial prompt in non-interactive mode:
 
 ```bash
@@ -786,7 +834,7 @@ Set `COPILOT_HOME` in your shell profile to use a custom config directory across
 
 ### Shell Completion
 
-The `copilot completion` subcommand generates a static shell completion script for subcommands, flags, and known option values. Once installed, pressing Tab auto-completes Copilot CLI commands in your terminal.
+The `copilot completion` subcommand generates a static shell completion script for subcommands, flags, and known option values. Once installed, pressing Tab auto-completes Copilot CLI commands in your terminal. Shell completion also suggests supported model names when using `--model` (v1.0.78+).
 
 ```bash
 # Bash — add to ~/.bashrc
