@@ -3,7 +3,7 @@ title: 'Copilot Configuration Basics'
 description: 'Learn how to configure GitHub Copilot at user, workspace, and repository levels to optimize your AI-assisted development experience.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-07-13
+lastUpdated: 2026-08-01
 estimatedReadingTime: '10 minutes'
 tags:
   - configuration
@@ -449,6 +449,8 @@ The model picker opens in a **full-screen view** with inline reasoning effort ad
 
 **Model family aliases** (v1.0.64+): Instead of typing a full model name, you can use short family aliases in the model setting: `opus`, `sonnet`, `haiku` (Anthropic), and `gpt`, `gemini` (Google/OpenAI). The CLI resolves the alias to the latest available model in that family. This is especially useful in scripts or configuration files where you want to track the best model in a family without hardcoding a version string.
 
+**Available models** include Anthropic Claude models (`claude-sonnet-4`, `claude-sonnet-4.6`, `claude-opus-4`), OpenAI GPT models (`gpt-4.1`, `o3`), Google Gemini models (`gemini-2.5-pro`), and xAI Grok models (`grok-4`, `grok-4.5`). The exact set of available models depends on your Copilot plan.
+
 ### CLI Session Commands
 
 The `/settings` command (v1.0.61+) opens an interactive dialog to browse and edit all user settings in one place. Use it to discover available settings, toggle options, and update values without manually editing your config file:
@@ -665,6 +667,14 @@ The `/usage` command displays session metrics such as the number of tokens consu
 /usage
 ```
 
+The `/limits predict` command *(v1.0.76+)* analyzes your recent sessions and suggests an appropriate AI-credit limit for the current session:
+
+```
+/limits predict
+```
+
+Use this before starting a long-running task to get a data-driven recommendation for how many credits the session is likely to need. The prediction is based on the size and complexity of sessions similar to your current one, helping you set a `sessionLimits` value that prevents runaway usage without cutting a task short.
+
 The `/compact` command summarizes the conversation history to free up context window space while preserving the thread of the conversation. Use it when your context is getting full but you do not want to start a fresh session:
 
 ```
@@ -703,6 +713,14 @@ The `/allow-all` command (also accessible as `/yolo`) enables autopilot mode, wh
 
 > **ACP clients (v1.0.39+)**: ACP clients can also toggle allow-all mode programmatically via session configuration, without issuing a slash command. This is useful for automated pipelines that drive Copilot CLI through the ACP protocol.
 
+The `/permissions` command *(v1.0.78+)* opens an interactive dialog for switching between **approval modes** — the same modes accessible via `/allow-all` and `/autopilot`, but surfaced in a single menu:
+
+```
+/permissions
+```
+
+Use `/permissions` to quickly review and change how the CLI handles tool approvals for the current session: fully interactive, autopilot (auto-approve all), or auto allow-all (AI judge evaluates each request). This is especially useful when you want to raise or lower the approval bar mid-session without remembering the specific command for each mode.
+
 The `/autopilot` command (v1.0.45+) is a quick in-session toggle that switches between **interactive mode** (where the agent pauses to ask for confirmation before tool use) and **autopilot mode** (where it runs autonomously). Unlike `/allow-all` which specifically controls whether tool permissions are required, `/autopilot` toggles the overall agent mode:
 
 ```
@@ -726,6 +744,16 @@ gh copilot --effort high "Refactor the authentication module"
 Accepted values are `low`, `medium`, and `high`. You can also set a default via the `effortLevel` config setting.
 
 ### CLI Startup Flags
+
+**Authentication and login**: The `copilot login` command authenticates with GitHub. Since v1.0.77, the default login flow on local interactive terminals is a **browser-based (web) OAuth flow** — a browser window opens, you authorise in your browser, and the CLI picks up the token automatically. On remote or headless terminals the classic device-code flow remains the default. You can force a specific flow:
+
+```bash
+copilot login              # web flow on local terminals, device code on headless
+copilot login --web-flow   # force browser-based OAuth
+copilot login --device-code  # force device-code flow (prints a code to enter at github.com/login/device)
+```
+
+You can also pick the flow interactively from inside a session with the `/login` command.
 
 The `-C <directory>` flag changes the working directory before starting, similar to `git -C` (v1.0.42+). This is useful for scripts or aliases that need to start Copilot CLI in a specific project directory without a separate `cd`:
 
@@ -760,6 +788,18 @@ copilot --no-sandbox -p "Set up development environment with system tools"
 ```
 
 These flags apply only to the current invocation — your persisted sandbox preference remains unchanged.
+
+The `allowDevToolCaches` sandbox setting *(v1.0.78+)* controls whether the sandbox permits sandboxed builds to access toolchain caches, package registries, and tool-specific install paths (npm cache, pip cache, Go module cache, etc.). It is **on by default**, so most builds work inside the sandbox without extra setup. Set it to `false` in your sandbox configuration to opt out and enforce a stricter cache-free environment:
+
+```json
+{
+  "sandbox": {
+    "allowDevToolCaches": false
+  }
+}
+```
+
+This is useful for CI-like environments where you want a clean, reproducible build that cannot reuse a stale cache.
 
 The `--attachment` flag (available in prompt mode, `-p`) lets you attach files — images or native documents — to the initial prompt in non-interactive mode:
 
