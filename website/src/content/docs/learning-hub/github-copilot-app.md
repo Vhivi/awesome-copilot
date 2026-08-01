@@ -3,7 +3,7 @@ title: 'Getting Started with the GitHub Copilot app'
 description: 'Learn about the GitHub Copilot app, a desktop experience built for agent-native development. Understand its key features and who it''s for.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-06-17
+lastUpdated: 2026-08-01
 estimatedReadingTime: '8 minutes'
 tags:
   - copilot-app
@@ -87,6 +87,18 @@ For a hands-on guide to building canvases with `/create-canvas`, see [Working wi
 - Can automatically merge when all conditions are met
 
 You control the automation level—decide whether Agent Merge should just run CI, address feedback, or go all the way to merging. It's a way to let Copilot handle the tedious parts of the review and merge process.
+
+### Sessions Sidebar *(Experimental)*
+
+*(v1.0.76+)* The **Sessions sidebar** is an opt-in experimental feature that lets you manage multiple concurrent CLI sessions from a single panel. Enable it with:
+
+```
+/experimental on
+```
+
+Once enabled, a collapsible sidebar appears alongside your session. It shows all active and backgrounded sessions — with their names, current status (idle, running, or waiting for input), and working branch — and lets you switch between them instantly. You can also spawn a new session directly from the sidebar without opening a new terminal window.
+
+This is especially useful when you have several agents working in parallel on different tasks and need a quick overview of what each one is doing without switching contexts.
 
 ## Who is the Copilot app for?
 
