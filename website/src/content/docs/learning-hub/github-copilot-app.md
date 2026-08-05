@@ -3,7 +3,7 @@ title: 'Getting Started with the GitHub Copilot app'
 description: 'Learn about the GitHub Copilot app, a desktop experience built for agent-native development. Understand its key features and who it''s for.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-06-17
+lastUpdated: 2026-08-05
 estimatedReadingTime: '8 minutes'
 tags:
   - copilot-app
@@ -67,7 +67,35 @@ Each session the Copilot app creates runs in its own **git worktree**—a real, 
 
 This makes it easy to dispatch multiple agents and trust they won't interfere with each other.
 
-### Canvases
+### Sessions Sidebar (Experimental)
+
+*(v1.0.76+, requires `/experimental on`)* The Copilot CLI now includes a **Sessions sidebar** for managing multiple concurrent terminal sessions from a single window. Enable it with:
+
+```
+/experimental on
+```
+
+With the Sessions sidebar active, you can:
+
+- **Switch between sessions** without opening separate terminal windows
+- **Spawn new sessions** directly from the sidebar
+- **See the status** of each session at a glance (running, idle, waiting for input)
+
+This brings a similar multi-session management experience to the CLI that the Copilot app provides for desktop users. To open an isolated git worktree in its own conversation, use the complementary `/new-worktree` command (see below).
+
+### Working with Git Worktrees from the CLI
+
+*(v1.0.78+)* The experimental `/new-worktree` command lets you create a new git worktree and immediately start a fresh Copilot conversation in it:
+
+```
+/new-worktree
+```
+
+This is useful when you want to work on a separate branch without leaving your current session — for example, to investigate a bug while keeping another session focused on a feature. Each worktree gets its own isolated Copilot context.
+
+> **Note**: `/new-worktree` is experimental. Enable experimental mode with `/experimental on` to access it.
+
+
 
 **Canvases** are interactive work surfaces where you and agents collaborate. Instead of long chat threads, a canvas shows the actual work:
 
