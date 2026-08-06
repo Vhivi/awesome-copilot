@@ -3,7 +3,7 @@ title: 'Copilot Configuration Basics'
 description: 'Learn how to configure GitHub Copilot at user, workspace, and repository levels to optimize your AI-assisted development experience.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-07-28
+lastUpdated: 2026-08-06
 estimatedReadingTime: '10 minutes'
 tags:
   - configuration
@@ -517,11 +517,13 @@ You can also press **x** on a highlighted session in the session picker (`--resu
 
 In the session picker, press **`s`** to cycle the sort order: relevance, last used, created, or name. The picker also shows the branch name and idle/in-use status for each session.
 
-The `/rewind` command opens a timeline picker that lets you roll back the conversation to any earlier point in history, reverting both the conversation and any file changes made after that point. You can also trigger it by pressing **double-Esc**:
+The `/rewind` command opens a timeline picker that lets you roll back the conversation to any earlier point in history. You can also trigger it by pressing **double-Esc**:
 
 ```
 /rewind
 ```
+
+When you select a point in the timeline, `/rewind` presents a choice between rolling back just the conversation or rolling back both the conversation and file changes. Only files that Copilot modified (not files you edited independently) are candidates for revert, so your own edits are always safe. As of v1.0.78, `/rewind` no longer requires git — it works the same way in any directory, regardless of whether it's a git repository.
 
 Use `/rewind` when you want to branch off from a different point in the conversation, rather than just undoing the most recent turn.
 
@@ -643,6 +645,8 @@ Use `/diagnose` when a session is behaving unexpectedly — it inspects session 
 
 **Inline image rendering** (v1.0.64+): The CLI can display images inline in the terminal when your terminal supports it. If an MCP tool, agent, or attachment returns an image, it is rendered directly in the conversation timeline rather than shown as a file path or URL. This works in terminals with image protocol support (such as iTerm2, Kitty, Wezterm, and tmux with appropriate configuration).
 
+**Tool call duration display** (v1.0.78+): Timeline headers now show how long each tool call took, right-aligned and updating live while the call is still running (for calls of at least 5 seconds). This makes it easy to spot slow tools or long-running commands at a glance. You can disable it with `/settings showToolDurations false`.
+
 The `/ask` command lets you ask a quick question without affecting your conversation history. The current session context is preserved, so you can use it for one-off lookups without derailing an ongoing task. Responses are rendered as full markdown, including tables and formatted links:
 
 ```
@@ -727,6 +731,14 @@ Use `/autopilot` when you want to flip between supervised and unsupervised opera
 
 > **Read-only `gh` CLI commands (v1.0.46+)**: Read-only `gh` commands — such as `gh issue list`, `gh pr view`, `gh run status`, and other commands that don't write to GitHub — are **automatically approved** without a permission prompt. Only commands that write to GitHub (like creating issues, merging PRs) still require explicit approval. This reduces friction during exploratory sessions where you frequently check issue or PR status.
 
+The `/permissions` command (v1.0.78+) is a unified way to switch between approval modes without needing to remember the individual commands:
+
+```
+/permissions
+```
+
+Running `/permissions` opens an interactive menu where you can switch between **interactive** (confirm each tool use), **autopilot** (auto-approve everything), and **auto** (LLM judge evaluates requests automatically). It replaces the need to juggle `/allow-all`, `/autopilot`, and related commands — all approval modes are accessible from one place.
+
 The `--effort` flag (shorthand for `--reasoning-effort`) controls how much computational reasoning the model applies to a request:
 
 ```bash
@@ -793,6 +805,18 @@ copilot --config-dir ~/.my-copilot-config
 ```
 
 Set `COPILOT_HOME` in your shell profile to use a custom config directory across all sessions. This is especially useful when running multiple Copilot configurations for different projects or teams.
+
+### Authentication
+
+The `copilot login` command authenticates you with GitHub. As of v1.0.77, it defaults to a **browser-based OAuth flow** on local interactive terminals — your browser opens automatically and you complete sign-in there. On remote or headless environments (SSH sessions, CI), it falls back to the device code flow:
+
+```bash
+copilot login              # opens browser (local) or device code (remote/headless)
+copilot login --web-flow   # force browser-based OAuth
+copilot login --device-code  # force device code flow
+```
+
+You can also use the interactive `/login` command inside a session to pick a flow or switch accounts.
 
 ### Shell Completion
 

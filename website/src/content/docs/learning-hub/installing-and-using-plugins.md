@@ -3,7 +3,7 @@ title: 'Installing and Using Plugins'
 description: 'Learn how to find, install, and manage plugins that extend GitHub Copilot CLI with reusable agents, skills, hooks, and integrations.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-07-28
+lastUpdated: 2026-08-06
 estimatedReadingTime: '8 minutes'
 tags:
   - plugins
@@ -247,6 +247,8 @@ When you install a plugin, its components become available to Copilot CLI automa
 - **MCP servers** extend the tools available to agents
 
 You don't need to do any additional configuration after installing — the plugin's components integrate seamlessly into your workflow. Plugins take effect immediately after installation without requiring a Copilot CLI restart.
+
+> **Auto-updates (v1.0.78+)**: First-party plugins (those installed from official GitHub Copilot marketplaces) automatically update to the latest version when you start a new session. This keeps bundled agents, skills, and hooks up to date without manual intervention. To check or update plugins manually, use `copilot plugin update`.
 
 ## Plugins from This Repository
 
